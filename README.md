@@ -122,20 +122,30 @@ Deploy your custom token to the Sepolia Testnet using:
 forge create src/<CONTRACT_FILE_NAME>:<CONTRACT_CLASS_NAME>   --rpc-url https://ethereum-sepolia-rpc.publicnode.com   --private-key <YOUR_PRIVATE_KEY>   --broadcast   --constructor-args <TOTAL_SUPPLY>
 ```
 
+Note:
+
+- TOTAL_SUPPLY refers to the units of the token that will be deployed. If you've set the token decimals to 5 and you want to release 1000 tokens on deployment, TOTAL_SUPPLY should be 100000000 (10^8)
+
 During deployment:
 
 - Foundry will compile (if needed) and prepare the contract bytecode  
 - The transaction will be sent to the Sepolia network  
 - Your wallet address will become the owner and initial token holder  
 
-Once the deployment completes, Foundry will display your **token contract address**.  
-This address uniquely identifies your token on the blockchain.
+Once the deployment completes, Foundry will display your ETH address, your **token contract address** ("Deployed to:"), and the hash of the token's first transaction.  
+The token contract address uniquely identifies your token on the blockchain.
 
 ---
 
 ## 🔍 7. Verify the Contract on Etherscan
 
 Verifying your contract allows anyone to read your source code directly from Etherscan, increasing transparency and making interactions easier.
+
+### Before verification, you must obtain an Etherscan API Key
+
+- Create an account on Etherscan: https://etherscan.io/register
+- Go to **My Profile** -> **API Dashboard**
+- Press **+ Add** and create an API Key Token, then copy it.
 
 Use this command:
 
