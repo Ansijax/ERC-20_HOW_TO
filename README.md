@@ -21,6 +21,10 @@ You will also need:
 - Some **Sepolia test ETH** to pay for deployment gas fees  
 - An **Etherscan API key** to verify your smart contract’s source code  
 
+> **Note:** after running the Foundry installer, `foundryup` may not be found
+> because your shell has not reloaded its PATH. Run `source ~/.bashrc` (or open
+> a new terminal), or add `export PATH="$PATH:$HOME/.foundry/bin"` to your
+> shell profile. Then run `foundryup` and check with `forge --version`.
 
 ---
 
@@ -65,6 +69,14 @@ You will need to update:
 - **Decimals** → The number of decimal units (commonly `18`)  
 - **Contract class name** → This should reflect the token’s name for clarity  
 
+The template does not compile until the three `TODO` lines in the constructor
+are filled in. For example:
+
+```solidity
+name = "MyToken";
+decimals = 2;
+symbol = "12345";
+```
 
 ---
 
@@ -125,6 +137,11 @@ forge create src/<CONTRACT_FILE_NAME>:<CONTRACT_CLASS_NAME>   --rpc-url https://
 Note:
 
 - TOTAL_SUPPLY refers to the units of the token that will be deployed. If you've set the token decimals to 5 and you want to release 1000 tokens on deployment, TOTAL_SUPPLY should be 100000000 (10^8)
+- Balances are stored in the smallest unit. With `decimals = 2`, sending
+  N tokens means passing `N * 100` to `transfer`. Make sure the total supply
+  is at least the amount you plan to send.
+- To avoid pasting your private key in the command (and in the shell history),
+  run `read -s PK` and use `--private-key $PK`.
 
 During deployment:
 
@@ -134,6 +151,13 @@ During deployment:
 
 Once the deployment completes, Foundry will display your ETH address, your **token contract address** ("Deployed to:"), and the hash of the token's first transaction.  
 The token contract address uniquely identifies your token on the blockchain.
+
+To send tokens:
+
+```
+cast send <TOKEN_ADDRESS> "transfer(address,uint256)" <TO> <AMOUNT_IN_UNITS> \
+  --rpc-url https://ethereum-sepolia-rpc.publicnode.com --private-key $PK
+```
 
 ---
 
@@ -150,8 +174,15 @@ Verifying your contract allows anyone to read your source code directly from Eth
 Use this command:
 
 ```bash
-forge verify-contract   --rpc-url https://ethereum-sepolia-rpc.publicnode.com   --etherscan-api-key <ETHERSCAN_API_KEY>   <TOKEN_ADDRESS>   src/<CONTRACT_FILE_NAME>:<CONTRACT_CLASS_NAME>
+forge verify-contract <TOKEN_ADDRESS> src/<CONTRACT_FILE_NAME>:<CONTRACT_CLASS_NAME> \
+  --chain sepolia \
+  --etherscan-api-key <ETHERSCAN_API_KEY> \
+  --constructor-args $(cast abi-encode "constructor(uint256)" <TOTAL_SUPPLY>) \
+  --watch
 ```
+
+`<TOTAL_SUPPLY>` must be the same value passed at deployment, and the source
+file must not be modified after deploying.
 
 After verification, your source code and ABI will appear on:  
 https://sepolia.etherscan.io/
